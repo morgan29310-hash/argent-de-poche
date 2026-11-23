@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7C3AED">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Mon argent de poche</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root{
+    --c:#7C3AED; --c2:#A78BFA; --bg:#F6F5FB; --card:#fff; --ink:#1E1B2E; --ink2:#5B5870; --muted:#8C89A0;
+    --line:#ECEAF3; --green:#15803D; --greenbg:#DCFCE7; --red:#B91C1C; --redbg:#FEE2E2; --amber:#92400E; --amberbg:#FEF3C7;
+    --radius:18px; --shadow:0 1px 2px rgba(30,27,46,.06),0 4px 16px rgba(30,27,46,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
+  html,body{margin:0;color:var(--ink);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  body{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+  .wrap{max-width:520px;margin:0 auto;padding:16px 16px 0}
+  h1{font-size:22px;margin:4px 0 2px}
+  h2{font-size:17px;margin:0 0 10px}
+  .sub{color:var(--ink2);font-size:14px}
+  .muted{color:var(--muted);font-size:13px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:14px 0}
+  .hero{background:linear-gradient(135deg,var(--c),var(--c2));color:#fff;border-radius:24px;padding:20px 20px 18px;margin:14px 0;box-shadow:0 8px 24px color-mix(in srgb,var(--c) 35%,transparent)}
+  .hero .lab{opacity:.9;font-size:14px;font-weight:600;letter-spacing:.2px}
+  .hero .big{font-size:44px;font-weight:800;letter-spacing:-1px;line-height:1.1;margin:4px 0 2px;font-variant-numeric:tabular-nums}
+  .hero .meteo{display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;margin-top:6px}
+  .hero .next{font-size:13px;opacity:.92;margin-top:10px}
+  .row{display:flex;gap:10px}
+  .btn{appearance:none;border:0;border-radius:14px;padding:14px 16px;font:inherit;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+  .btn.main{background:var(--c);color:#fff}
+  .btn.soft{background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c)}
+  .btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn.danger{background:var(--redbg);color:var(--red)}
+  .btn.small{padding:9px 12px;font-size:14px;border-radius:11px;width:auto}
+  .btn:disabled{opacity:.5}
+  a.btn{text-decoration:none}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{background:var(--bg);border-radius:14px;padding:12px}
+  .kpi .v{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .kpi .l{font-size:12px;color:var(--ink2);font-weight:600}
+  .bars .b{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;margin:8px 0;font-size:14px}
+  .bars .track{height:10px;background:var(--bg);border-radius:6px;overflow:hidden}
+  .bars .fill{height:100%;background:var(--c);border-radius:6px}
+  .list .month{font-size:13px;font-weight:700;color:var(--ink2);text-transform:capitalize;margin:16px 4px 6px}
+  .item{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px;margin:6px 0;box-shadow:var(--shadow);cursor:pointer}
+  .item .ico{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
+  .item .t{flex:1;min-width:0}
+  .item .t b{display:block;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .t span{font-size:12.5px;color:var(--muted)}
+  .item .m{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pos{color:var(--green)} .neg{color:var(--ink)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;margin-left:4px;vertical-align:1px}
+  .tag.ok{background:var(--greenbg);color:var(--green)}
+  .tag.warn{background:var(--amberbg);color:var(--amber)}
+  .tag.bad{background:var(--redbg);color:var(--red)}
+  .status{border-radius:14px;padding:12px 14px;font-size:14px;margin:10px 0 0}
+  .status.ok{background:var(--greenbg);color:var(--green)}
+  .status.warn{background:var(--amberbg);color:var(--amber)}
+  .status.bad{background:var(--redbg);color:var(--red)}
+  .chk{width:30px;height:30px;border-radius:9px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:none;font-size:16px;color:#fff;background:#fff}
+  .chk.on{background:var(--green);border-color:var(--green)}
+  .seg{display:flex;background:#E9E7F1;border-radius:13px;padding:4px;gap:4px;margin:12px 0}
+  .seg button{flex:1;border:0;background:transparent;border-radius:10px;padding:9px 6px;font:inherit;font-weight:700;font-size:14px;color:var(--ink2);cursor:pointer}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:var(--shadow)}
+  .tabs{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:5}
+  .tabs button{flex:1;max-width:170px;border:0;background:none;font:inherit;font-size:12px;font-weight:700;color:var(--muted);padding:6px 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+  .tabs button .i{font-size:22px;filter:grayscale(1);opacity:.6}
+  .tabs button.on{color:var(--c)} .tabs button.on .i{filter:none;opacity:1}
+  .kid{border-left:6px solid var(--kc)}
+  .kid .top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .kid .sol{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+  .alerts{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .al{font-size:13.5px;border-radius:10px;padding:8px 10px}
+  /* feuille du bas */
+  .veil{position:fixed;inset:0;background:rgba(20,18,35,.45);z-index:20;display:none;align-items:flex-end;justify-content:center}
+  .veil.open{display:flex}
+  .sheet{background:#fff;width:100%;max-width:560px;border-radius:24px 24px 0 0;padding:10px 18px calc(18px + env(safe-area-inset-bottom));max-height:92vh;overflow:auto;animation:up .22s ease-out}
+  @keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+  .grab{width:44px;height:5px;background:var(--line);border-radius:3px;margin:2px auto 12px}
+  label.f{display:block;font-size:13px;font-weight:700;color:var(--ink2);margin:14px 0 6px}
+  input,select{width:100%;font:inherit;font-size:17px;padding:13px 14px;border:1.5px solid var(--line);border-radius:13px;background:#fff;color:var(--ink);outline:none}
+  input:focus,select:focus{border-color:var(--c)}
+  .amount{font-size:38px;font-weight:800;text-align:center;padding:10px;border:0;border-bottom:2px solid var(--line);border-radius:0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;font:inherit;font-size:14px;font-weight:650;cursor:pointer;color:var(--ink)}
+  .chip.on{background:var(--c);border-color:var(--c);color:#fff}
+  .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:30;display:none;max-width:90%;text-align:center}
+  .loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:40;flex-direction:column;gap:12px;color:var(--ink2)}
+  .spin{width:36px;height:36px;border:4px solid var(--line);border-top-color:var(--c);border-radius:50%;animation:s 1s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .empty{text-align:center;color:var(--muted);padding:24px 10px;font-size:14px}
+  .linkbox{display:flex;gap:8px;align-items:center;margin:8px 0}
+  .linkbox input{font-size:12px;padding:9px 10px}
+  .help{font-size:13px;color:var(--ink2);background:var(--bg);border-radius:12px;padding:10px 12px;margin-top:10px}
+  .hide{display:none!important}
+  /* ---- ciel météo (fond d'écran des enfants) ---- */
+  body{background:transparent}
+  #sky{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;transition:background .8s}
+  #sky.soleil{background:linear-gradient(180deg,#FFD978 0%,#FFF1C2 32%,#FBF8EE 62%,#F6F5FB 100%)}
+  #sky.nuages{background:linear-gradient(180deg,#AFC0D6 0%,#D6DEEA 38%,#EEF1F6 70%,#F3F4F8 100%)}
+  #sky.pluie{background:linear-gradient(180deg,#4E5B70 0%,#76839A 34%,#AEB7C6 66%,#D5DAE2 100%)}
+  .skyl .sun{position:absolute;top:-70px;right:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,#FFC928 0 40%,rgba(255,201,40,.45) 41%,rgba(255,201,40,0) 68%);animation:pulse 4s ease-in-out infinite}
+  .skyl .rays{position:absolute;top:-210px;right:-210px;width:520px;height:520px;border-radius:50%;background:repeating-conic-gradient(rgba(255,190,30,.30) 0 7deg,transparent 7deg 20deg);-webkit-mask:radial-gradient(circle,transparent 22%,#000 24%,#000 55%,transparent 72%);mask:radial-gradient(circle,transparent 22%,#000 24%,#000 55%,transparent 72%);animation:spin 50s linear infinite}
+  .skyl .cloud{position:absolute;left:0;width:170px;height:56px;background:var(--cl,#fff);border-radius:56px;opacity:.92;animation:drift var(--d,45s) linear infinite;animation-delay:var(--dl,0s);filter:drop-shadow(0 6px 10px rgba(40,50,70,.08))}
+  .skyl .cloud::before,.skyl .cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
+  .skyl .cloud::before{width:76px;height:76px;top:-38px;left:24px}
+  .skyl .cloud::after{width:98px;height:98px;top:-54px;left:66px}
+  .skyl.pluie .cloud{--cl:#8A96AA;opacity:.95}
+  .skyl .drop{position:absolute;top:-30px;width:2px;height:18px;border-radius:2px;background:linear-gradient(rgba(255,255,255,0),rgba(225,235,255,.95));animation:fall var(--d,.8s) linear infinite;animation-delay:var(--dl,0s)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes pulse{50%{transform:scale(1.06)}}
+  @keyframes drift{from{transform:translateX(-280px) scale(var(--s,1))}to{transform:translateX(calc(100vw + 280px)) scale(var(--s,1))}}
+  @keyframes fall{to{transform:translateY(115vh)}}
+  body.pluie > .wrap > h1, body.pluie > .wrap > .sub{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+  @media (prefers-reduced-motion: reduce){ .skyl *{animation:none!important} .skyl .drop{display:none} }
+  /* mini-ciel des cartes enfants (vue Papa) */
+  .card.kid{position:relative;overflow:hidden}
+  .card.kid > *:not(.minisky){position:relative;z-index:1}
+  .minisky{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .minisky.soleil{background:linear-gradient(160deg,#FFE29A 0%,#FFF4D2 45%,#FFFDF7 100%)}
+  .minisky.nuages{background:linear-gradient(160deg,#BFCDE0 0%,#E2E8F1 50%,#F7F8FB 100%)}
+  .minisky.pluie{background:linear-gradient(160deg,#56647B 0%,#8591A6 45%,#BCC4D1 100%)}
+  .minisky .sun{width:150px;height:150px;top:-48px;right:-48px}
+  .minisky .rays{width:340px;height:340px;top:-143px;right:-143px}
+  .minisky .cloud{animation-name:driftc}
+  .minisky .drop{animation-name:fallc}
+  @keyframes driftc{from{transform:translateX(-260px) scale(var(--s,1))}to{transform:translateX(640px) scale(var(--s,1))}}
+  @keyframes fallc{to{transform:translateY(600px)}}
+  .card.kid .kpi{background:rgba(255,255,255,.8)}
+  .card.kid.pluie .top, .card.kid.pluie .top .muted{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+  /* motifs perso des enfants (par-dessus la météo) */
+  .skyl .motif{position:absolute;inset:0;background-size:220px 220px;animation:motif 140s linear infinite}
+  .skyl.pluie .motif{opacity:.75}
+  @keyframes motif{to{background-position:220px 220px}}
+  .skyl.fond-vetements{background:linear-gradient(180deg,#FCEEF6 0%,#F5EFFD 55%,#F6F5FB 100%)}
+  .skyl.fond-briques{background:linear-gradient(180deg,#E6F0FD 0%,#EFF5FC 55%,#F6F5FB 100%)}
+  .wrap > h1, .wrap > .sub{text-shadow:0 0 8px rgba(255,255,255,.95),0 0 3px rgba(255,255,255,.95)}
+  /* météo dans l'encadré du solde */
+  .hero{position:relative;overflow:hidden}
+  .hero > *:not(.minisky){position:relative;z-index:1}
+  .hero .minisky{background:none}
+  .hero .minisky.pluie{background:linear-gradient(160deg,rgba(20,26,45,.42),rgba(20,26,45,.18))}
+  .hero .minisky .sun{width:130px;height:130px;top:-38px;right:-38px}
+  .hero .minisky .rays{width:300px;height:300px;top:-123px;right:-123px}
+  .hero .minisky.nuages .cloud{--cl:rgba(255,255,255,.6);opacity:1;filter:none}
+  .hero .minisky.pluie .cloud{--cl:rgba(205,213,228,.55);opacity:1;filter:none}
+  /* fond « argent » de la page de Papa */
+  #sky.papa{background-color:#EEF6F1;background-image:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%22240%22%20height=%22240%22%20viewBox=%220%200%20240%20240%22%3E%20%3Cg%20fill=%22none%22%20stroke=%22%231F6B4F%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%20opacity=%22.16%22%3E%20%3Cg%20transform=%22rotate(-10%2055%2040)%22%3E%3Crect%20x=%2218%22%20y=%2220%22%20width=%2276%22%20height=%2240%22%20rx=%226%22/%3E%3Crect%20x=%2224%22%20y=%2226%22%20width=%2264%22%20height=%2228%22%20rx=%223%22/%3E%3Ccircle%20cx=%2256%22%20cy=%2240%22%20r=%229%22/%3E%3Cpath%20d=%22M59%2036.5a5%205%200%201%200%200%207M50.5%2039h7M50.5%2041.5h7%22/%3E%3C/g%3E%20%3Cg%20transform=%22rotate(14%20170%20150)%22%3E%3Crect%20x=%22132%22%20y=%22130%22%20width=%2276%22%20height=%2240%22%20rx=%226%22/%3E%3Crect%20x=%22138%22%20y=%22136%22%20width=%2264%22%20height=%2228%22%20rx=%223%22/%3E%3Ccircle%20cx=%22170%22%20cy=%22150%22%20r=%229%22/%3E%3Cpath%20d=%22M173%20146.5a5%205%200%201%200%200%207M164.5%20149h7M164.5%20151.5h7%22/%3E%3C/g%3E%20%3Cpath%20d=%22M150%2040c-12%200-19%208-19%2017s7%2017%2019%2017M127%2051h20M127%2062h20%22%20stroke-width=%223%22/%3E%20%3Cpath%20d=%22M222%2096l2%206%206%202-6%202-2%206-2-6-6-2%206-2z%22/%3E%3Cpath%20d=%22M112%20214l1.5%204%204%201.5-4%201.5-1.5%204-1.5-4-4-1.5%204-1.5z%22/%3E%3Cpath%20d=%22M96%2092l1.5%204%204%201.5-4%201.5-1.5%204-1.5-4-4-1.5%204-1.5z%22/%3E%20%3C/g%3E%20%3Cg%20stroke=%22%231F6B4F%22%20stroke-width=%222%22%20opacity=%22.18%22%3E%20%3Ccircle%20cx=%22208%22%20cy=%2234%22%20r=%2215%22%20fill=%22%23E8B923%22%20fill-opacity=%22.35%22/%3E%3Ccircle%20cx=%22208%22%20cy=%2234%22%20r=%2210.5%22%20fill=%22none%22/%3E%3Cpath%20d=%22M211%2030a5%205%200%201%200%200%208M203%2033h6M203%2035.5h6%22%20fill=%22none%22%20stroke-linecap=%22round%22/%3E%20%3Cellipse%20cx=%2250%22%20cy=%22196%22%20rx=%2220%22%20ry=%226.5%22%20fill=%22%23E8B923%22%20fill-opacity=%22.35%22/%3E%3Cpath%20d=%22M30%20196v8c0%203.6%209%206.5%2020%206.5s20-2.9%2020-6.5v-8%22%20fill=%22%23E8B923%22%20fill-opacity=%22.3%22/%3E%20%3Cpath%20d=%22M30%20186v8c0%203.6%209%206.5%2020%206.5s20-2.9%2020-6.5v-8%22%20fill=%22%23E8B923%22%20fill-opacity=%22.3%22/%3E%3Cellipse%20cx=%2250%22%20cy=%22186%22%20rx=%2220%22%20ry=%226.5%22%20fill=%22%23E8B923%22%20fill-opacity=%22.4%22/%3E%20%3Cpath%20d=%22M30%20176v8c0%203.6%209%206.5%2020%206.5s20-2.9%2020-6.5v-8%22%20fill=%22%23E8B923%22%20fill-opacity=%22.3%22/%3E%3Cellipse%20cx=%2250%22%20cy=%22176%22%20rx=%2220%22%20ry=%226.5%22%20fill=%22%23E8B923%22%20fill-opacity=%22.45%22/%3E%20%3Ccircle%20cx=%22104%22%20cy=%22150%22%20r=%2211%22%20fill=%22%23E8B923%22%20fill-opacity=%22.3%22/%3E%3Ccircle%20cx=%22104%22%20cy=%22150%22%20r=%227.5%22%20fill=%22none%22/%3E%20%3C/g%3E%20%3C/svg%3E"),linear-gradient(180deg,#E6F3EC 0%,#F3F8F4 45%,#F7F6FB 100%);background-size:240px 240px,100% 100%;background-repeat:repeat,no-repeat;animation:argent 160s linear infinite}
+  @keyframes argent{to{background-position:240px 240px,0 0}}
+  @media (prefers-reduced-motion: reduce){ #sky.papa{animation:none} }
+</style>
+</head>
+<body>
+<div id="sky" class="skyl"></div>
+<div class="loading" id="loading"><div class="spin"></div><div>Chargement…</div></div>
+<div class="wrap" id="app"></div>
+<nav class="tabs hide" id="tabs"></nav>
+<div class="veil" id="veil"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Qui ouvre l'appli : lu une fois dans le lien (?u=…&k=…), puis gardé sur le téléphone.
+var API = 'https://script.google.com/macros/s/AKfycbyOF55YZR1o1q5plHCeD8HhifkyGIhsEYz5zmh59ehwUJbB8zIjz7lFgwoWv0l7xLecIg/exec';
+var BOOT = (function(){
+  var q = new URLSearchParams(location.search);
+  var u = (q.get('u')||'').toLowerCase().replace(/[^a-z]/g,''), k = (q.get('k')||'').replace(/[^A-Za-z0-9]/g,'');
+  try{
+    if(u && k){ localStorage.setItem('ap.boot', JSON.stringify({u:u,k:k})); history.replaceState(null,'',location.pathname); }
+    else { var s = JSON.parse(localStorage.getItem('ap.boot')||'null'); if(s){ u=s.u; k=s.k; } }
+  }catch(e){}
+  return {u:u, k:k};
+})();
+document.title = BOOT.u==='papa' ? 'Argent de poche – Papa' : BOOT.u==='manon' ? 'Mon argent – Manon' : BOOT.u==='timotei' ? 'Mon argent – Timoteï' : 'Mon argent de poche';
+var D = null;            // données reçues du serveur
+var VIEW = 'accueil';    // onglet courant
+var KID = null;          // enfant sélectionné (vue Papa)
+
+var CAT_ICO = {'Sorties':'🎉','Nourriture':'🍔','Vêtements':'👕','Transport':'🚌','Loisirs':'🎮','Téléphone':'📱','Cadeaux':'🎁','Beauté':'💄','École':'📚','Autre':'🧾'};
+var MOT_ICO = {'Noël':'🎄','Anniversaire':'🎂','Récompense':'🏆','Vacances':'🏖️','Autre':'✨'};
+var MOIS_C = ['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+var MOIS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+// ---------- appels serveur
+function call(fn){
+  var args = Array.prototype.slice.call(arguments,1);
+  return new Promise(function(res,rej){
+    fetch(API,{method:'POST',body:JSON.stringify({fn:fn,args:[BOOT.u,BOOT.k].concat(args)})})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ if(j && j.ok) res(j.data); else rej(new Error((j && j.err) || 'Erreur')); })
+      .catch(function(){ rej(new Error(navigator.onLine ? 'Connexion impossible, réessaie dans un instant.' : 'Pas d\'internet pour le moment.')); });
+  });
+}
+function act(fn){
+  var args = Array.prototype.slice.call(arguments,1);
+  busy(true);
+  return call.apply(null,[fn].concat(args)).then(function(d){ D=d; busy(false); render(); return d; })
+    .catch(function(e){ busy(false); toast('⚠️ '+msg(e)); throw e; });
+}
+function msg(e){ return (e && e.message ? e.message : String(e)).replace(/^Error:\s*/,''); }
+function busy(on){ document.querySelectorAll('.sheet .btn').forEach(function(b){ b.disabled=on; }); }
+
+// ---------- outils
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]}); }
+function eur(n,sign){ var a=Math.abs(Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €'; if(n<0) return '− '+a; if(sign && n>0) return '+ '+a; return a; }
+function eur0(n){ return (Math.round(n*100)/100).toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2})+' €'; }
+function dfr(d){ if(!d) return ''; var p=d.split('-'); return Number(p[2])+' '+MOIS_C[Number(p[1])-1]+(p[0]!==D.today.slice(0,4)?' '+p[0]:''); }
+function dlong(d){ var p=d.split('-'); return Number(p[2])+(p[2]==='01'?'er':'')+' '+MOIS[Number(p[1])-1]; }
+function daysBetween(a,b){ return Math.round((Date.parse(b)-Date.parse(a))/86400000); }
+function toast(t){ var el=document.getElementById('toast'); el.textContent=t; el.style.display='block'; clearTimeout(toast._t); toast._t=setTimeout(function(){el.style.display='none'},2600); }
+function setColor(c){ document.documentElement.style.setProperty('--c',c); document.documentElement.style.setProperty('--c2',mix(c)); }
+function mix(hex){ var n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255; r=Math.round(r+(255-r)*.35);g=Math.round(g+(255-g)*.35);b=Math.round(b+(255-b)*.35); return 'rgb('+r+','+g+','+b+')'; }
+function kid(id){ return D.enfants.filter(function(e){return e.id===id})[0]; }
+function icon(m){ if(m.type==='depense') return CAT_ICO[m.categorie]||'🧾'; if(m.type==='exceptionnel') return MOT_ICO[m.categorie]||'✨'; if(m.type==='mensuel') return '💶'; if(m.type==='correction') return '🔧'; return '💰'; }
+function titre(m){ if(m.libelle) return m.libelle; if(m.type==='depense') return m.categorie||'Dépense'; if(m.type==='exceptionnel') return (m.categorie||'Cadeau')+' de Papa'; if(m.type==='correction') return 'Correction'; return 'Argent reçu'; }
+
+// ---------- calculs
+function actifs(en){ return en.mouvements.filter(function(m){ return m.date>=D.dateDepart; }); }
+function solde(en,jusqua){ var s=en.soldeDepart; actifs(en).forEach(function(m){ if(!jusqua||m.date<=jusqua) s+=m.montant; }); return Math.round(s*100)/100; }
+function duMois(en){ var mo=D.today.slice(0,7), dep=0, rec=0, cats={}; actifs(en).forEach(function(m){ if(m.date.slice(0,7)!==mo) return; if(m.montant<0){dep-=m.montant; if(m.type==='depense') cats[m.categorie]=(cats[m.categorie]||0)-m.montant;} else rec+=m.montant; }); return {dep:dep,rec:rec,cats:cats}; }
+function prochainVirement(){ var t=D.today, j=('0'+D.jourVirement).slice(-2), y=Number(t.slice(0,4)), m=Number(t.slice(5,7)); var d=y+'-'+('0'+m).slice(-2)+'-'+j; if(d<=t){ m++; if(m>12){m=1;y++;} d=y+'-'+('0'+m).slice(-2)+'-'+j; } return d; }
+var MOTIF_ENFANT = { manon: 'vetements', timotei: 'briques' };   // motif en fond de l'appli de chaque enfant
+var SEUIL_SOLEIL = 50, SEUIL_NUAGES = 25;   // ☀️ 50 € et plus · ☁️ de 25 à 50 € · 🌧️ moins de 25 €
+function niveauMeteo(s){ return s>=SEUIL_SOLEIL ? 'soleil' : s>=SEUIL_NUAGES ? 'nuages' : 'pluie'; }
+function meteo(en){ var s=solde(en), n=niveauMeteo(s); if(n==='soleil') return '☀️ Grand soleil'; if(n==='nuages') return '☁️ Quelques nuages'; return s<0 ? '🌧️ Il pleut : à découvert !' : '🌧️ Il pleut'; }
+function motifURI(kind){
+  var o='<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">';
+  function studs(xs,ys){ var h=''; xs.forEach(function(x){ ys.forEach(function(y){ h+='<circle cx="'+x+'" cy="'+y+'" r="5.5"/><circle cx="'+(x-1.5)+'" cy="'+(y-1.5)+'" r="1.6" fill="#fff" fill-opacity=".6" stroke="none"/>'; }); }); return h; }
+  function g(x,y,r,attrs,inner){ return '<g transform="translate('+x+' '+y+') rotate('+r+')" '+attrs+'>'+inner+'</g>'; }
+  if(kind==='briques'){
+    var b24=function(x,y,r,c){ return g(x,y,r,'fill="'+c+'" stroke="'+c+'"','<rect x="-34" y="-18" width="68" height="36" rx="4" fill-opacity=".45" stroke-opacity=".8"/><g fill-opacity=".6" stroke-opacity=".8">'+studs([-25.5,-8.5,8.5,25.5],[-8.5,8.5])+'</g>'); };
+    var b22=function(x,y,r,c){ return g(x,y,r,'fill="'+c+'" stroke="'+c+'"','<rect x="-18" y="-18" width="36" height="36" rx="4" fill-opacity=".45" stroke-opacity=".8"/><g fill-opacity=".6" stroke-opacity=".8">'+studs([-8.5,8.5],[-8.5,8.5])+'</g>'); };
+    var bs=function(x,y,r,c){ return g(x,y,r,'fill="'+c+'" stroke="'+c+'" fill-opacity=".45" stroke-opacity=".8"','<rect x="-34" y="-8" width="68" height="20" rx="2.5"/>'+[-28,-11,6,23].map(function(sx){return '<rect x="'+sx+'" y="-14" width="10" height="6" rx="1.5"/>';}).join('')); };
+    o+='<g stroke-width="1.6" opacity=".5">'+b24(52,44,-12,'#E3342F')+b22(170,36,18,'#F2B705')+bs(150,120,8,'#2F6FE4')+b22(46,150,-6,'#1E9E62')+b24(150,190,-4,'#F2B705')+bs(60,96,-20,'#1E9E62')+b22(104,206,10,'#2F6FE4')+'</g>';
+  } else {
+    var st='fill-opacity=".45" stroke="#6D28D9" stroke-opacity=".55" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"';
+    var f=function(x,y,r,c,inner){ return g(x,y,r,'fill="'+c+'" '+st,inner); };
+    var coeur='<path d="M0 6 C-10 -2 -10 -10 -4 -10 C-1 -10 0 -7 0 -6 C0 -7 1 -10 4 -10 C10 -10 10 -2 0 6 Z"/>';
+    o+='<g opacity=".55">'+
+      f(44,40,-10,'#F472B6','<path d="M-12 -20 L-24 -14 L-31 -2 L-21 3 L-18 -3 L-18 22 L18 22 L18 -3 L21 3 L31 -2 L24 -14 L12 -20 Q0 -11 -12 -20 Z"/>')+
+      f(160,46,8,'#A78BFA','<path d="M-8 -22 L8 -22 L10 -11 L6 -4 L22 24 L-22 24 L-6 -4 L-10 -11 Z"/><path d="M-8 -22 L-9 -29 M8 -22 L9 -29 M-7 -4 L7 -4" fill="none"/>')+
+      f(104,112,0,'none','<path d="M0 -12 a5 5 0 1 1 5 -5" fill="none"/><path d="M0 -12 L0 -8 L-26 9 L26 9 Z" fill="none"/>')+
+      f(40,160,6,'#6EE7B7','<path d="M-16 -22 L16 -22 L18 24 L4 24 L0 -3 L-4 24 L-18 24 Z"/><path d="M-16 -15 L16 -15" fill="none"/>')+
+      f(172,150,-12,'#FDBA74','<rect x="-16" y="-6" width="32" height="26" rx="5"/><path d="M-9 -6 Q-9 -20 0 -20 Q9 -20 9 -6" fill="none"/>')+
+      f(120,198,4,'#A78BFA','<path d="M-26 6 L-26 -6 Q-18 -8 -12 -14 L0 -14 Q4 -4 18 -2 Q28 0 28 6 Z"/><rect x="-27" y="6" width="56" height="6" rx="3" fill="#fff" fill-opacity=".8"/><path d="M-8 -11 L-3 -6 M-4 -13 L1 -8" fill="none"/>')+
+      f(108,30,0,'#F472B6',coeur)+f(204,104,12,'#6EE7B7',coeur)+'</g>';
+  }
+  return 'url("data:image/svg+xml,'+encodeURIComponent(o+'</svg>')+'")';
+}
+function setSky(n,motif){
+  var el=document.getElementById('sky'); var key=(n||'')+'|'+(motif||''); if((el.dataset.n||'')===key) return;
+  el.dataset.n=key; el.className='skyl'+(n?' '+n:'')+(motif?' fond-'+motif:'');
+  document.body.classList.remove('soleil','nuages','pluie','papa'); if(n) document.body.classList.add(n);
+  el.innerHTML=(motif?'<div class="motif '+motif+'" style=\'background-image:'+motifURI(motif)+'\'></div>':'')+skyHTML(n,false);
+}
+function skyHTML(n,mini){
+  var h='';
+  if(n==='soleil') h='<div class="rays"></div><div class="sun"></div>';
+  if(n==='nuages'||n==='pluie'){
+    var cl = mini ? [[16,.55,30,-4],[78,.42,38,-21],[140,.5,34,-12]] : [[60,1,46,-6],[150,.7,62,-34],[18,.55,52,-20],[240,.85,70,-50],[110,.6,58,-12]];
+    cl.forEach(function(c){ h+='<div class="cloud" style="top:'+c[0]+'px;--s:'+c[1]+';--d:'+c[2]+'s;--dl:'+c[3]+'s"></div>'; });
+  }
+  if(n==='pluie'){ var nb = mini ? 35 : 70; for(var i=0;i<nb;i++){ var d=(0.55+Math.random()*0.5).toFixed(2); h+='<div class="drop" style="left:'+(Math.random()*100).toFixed(1)+'%;--d:'+d+'s;--dl:-'+(Math.random()*2).toFixed(2)+'s;opacity:'+(0.45+Math.random()*0.5).toFixed(2)+'"></div>'; } }
+  return h;
+}
+function derniereSaisie(en){ var d=null; en.mouvements.forEach(function(m){ if(m.saisiPar===en.id && (!d||m.creeLe>d)) d=m.creeLe; }); return d?d.slice(0,10):null; }
+function dernierControleBanque(en){ var b=null; en.banques.forEach(function(x){ if(!b||x.creeLe>b.creeLe) b=x; }); if(!b) return null; return {date:b.date, solde:b.solde, ecart:Math.round((b.solde-solde(en,b.date))*100)/100, par:b.saisiPar}; }
+function aControler(en){ return en.mouvements.filter(function(m){ return !m.controle && m.saisiPar!=='papa' && m.saisiPar!=='auto'; }).length; }
+function tri(list){ return list.slice().sort(function(a,b){ return a.date<b.date?1:a.date>b.date?-1:(a.creeLe<b.creeLe?1:-1); }); }
+
+// ---------- rendu
+function render(){
+  document.getElementById('loading').style.display='none';
+  if(D.role==='enfant'){ var en=D.enfants[0]; setColor(en.couleur); renderEnfant(en); }
+  else renderPapa();
+}
+
+function renderEnfant(en){
+  var tabs=document.getElementById('tabs'); tabs.classList.add('hide');
+  var s=solde(en), mo=duMois(en), nv=prochainVirement(), bc=dernierControleBanque(en);
+  setSky(null, MOTIF_ENFANT[en.id]);
+  var h='';
+  h+='<h1>Salut '+esc(en.prenom)+' '+en.emoji+'</h1><div class="sub">'+cap(dlong(D.today))+'</div>';
+  var niv=niveauMeteo(s);
+  h+='<div class="hero"><div class="minisky skyl '+niv+'">'+skyHTML(niv,true)+'</div><div class="lab">Mon solde</div><div class="big">'+eur(s)+'</div><span class="meteo">'+meteo(en)+'</span>';
+  if(en.mensuel>0) h+='<div class="next">Prochain virement de Papa : '+eur0(en.mensuel)+' le '+dlong(nv)+'</div>';
+  h+='</div>';
+  h+='<div class="row"><button class="btn main" onclick="formDepense()">➖ J\'ai dépensé</button><button class="btn soft" onclick="formRentree()">➕ J\'ai reçu</button></div>';
+  h+='<div class="card"><h2>Ce mois-ci</h2><div class="kpis"><div class="kpi"><div class="l">Dépensé</div><div class="v">'+eur(mo.dep)+'</div></div><div class="kpi"><div class="l">Reçu</div><div class="v pos">'+eur(mo.rec)+'</div></div></div>'+bars(mo.cats)+'</div>';
+  h+='<div class="card"><h2>🏦 Vérifier avec ma banque</h2>'+statutBanque(bc,true)+'<button class="btn ghost" style="margin-top:12px" onclick="formBanque(\''+en.id+'\')">Comparer avec mon appli bancaire</button></div>';
+  h+='<div class="list">'+historique(en,false)+'</div>';
+  document.getElementById('app').innerHTML=h;
+}
+
+function bars(cats){
+  var k=Object.keys(cats).sort(function(a,b){return cats[b]-cats[a]}); if(!k.length) return '<div class="muted" style="margin-top:10px">Aucune dépense notée ce mois-ci.</div>';
+  var max=cats[k[0]]; return '<div class="bars" style="margin-top:8px">'+k.map(function(c){ return '<div class="b"><span>'+(CAT_ICO[c]||'🧾')+'</span><div><div style="font-size:13px;font-weight:600">'+esc(c)+'</div><div class="track"><div class="fill" style="width:'+Math.max(4,Math.round(cats[c]/max*100))+'%"></div></div></div><b>'+eur(cats[c])+'</b></div>'; }).join('')+'</div>';
+}
+
+function statutBanque(bc,enfant){
+  if(!bc) return '<div class="status warn">'+(enfant?'Tu n\'as encore jamais comparé avec ton appli bancaire. Fais-le de temps en temps pour être sûr(e) que tout est noté.':'Pas encore de comparaison avec la banque.')+'</div>';
+  var quand=daysBetween(bc.date,D.today), q=quand===0?'aujourd\'hui':quand===1?'hier':'il y a '+quand+' jours';
+  if(Math.abs(bc.ecart)<1) return '<div class="status ok">✅ Comparé '+q+' : '+(enfant?'ton appli est juste, bravo !':'l\'appli est juste.')+'</div>';
+  if(bc.ecart<0) return '<div class="status bad">⚠️ Comparé '+q+' : la banque affiche <b>'+eur(-bc.ecart)+'</b> de moins. '+(enfant?'Il manque sûrement des dépenses à noter.':'Des dépenses n\'ont pas été notées.')+'</div>';
+  return '<div class="status warn">🔎 Comparé '+q+' : la banque affiche <b>'+eur(bc.ecart)+'</b> de plus. '+(enfant?'Une rentrée d\'argent n\'est peut-être pas notée.':'Une rentrée n\'a peut-être pas été notée.')+'</div>';
+}
+
+function historique(en,papa){
+  var l=tri(en.mouvements); if(!l.length) return '<div class="empty">'+(papa?'Aucune opération pour l\'instant.':'Rien pour l\'instant. Note ta première dépense avec le bouton « J\'ai dépensé ».')+'</div>';
+  var h='', mo='';
+  l.forEach(function(m){
+    var k=m.date.slice(0,7); if(k!==mo){ mo=k; h+='<div class="month">'+MOIS[Number(k.slice(5,7))-1]+' '+k.slice(0,4)+'</div>'; }
+    var avant=m.date<D.dateDepart;
+    var tags=''; if(m.controle) tags+='<span class="tag ok">✓ vu par Papa</span>'; if(m.type==='correction') tags+='<span class="tag warn">correction</span>'; if(avant) tags+='<span class="tag warn">avant le départ</span>';
+    var qui = papa ? (m.saisiPar==='papa'?' · par Papa':m.saisiPar==='auto'?' · automatique':'') : (m.saisiPar==='papa'?' · par Papa':'');
+    h+='<div class="item" onclick="detail(\''+en.id+'\',\''+m.id+'\')">';
+    if(papa) h+='<div class="chk'+(m.controle?' on':'')+'" onclick="event.stopPropagation();ctrl(\''+m.id+'\','+(!m.controle)+')">'+(m.controle?'✓':'')+'</div>';
+    h+='<div class="ico">'+icon(m)+'</div><div class="t"><b>'+esc(titre(m))+'</b><span>'+dfr(m.date)+esc(qui)+'</span>'+(tags?'<div>'+tags+'</div>':'')+'</div><div class="m '+(m.montant>0?'pos':'neg')+'">'+eur(m.montant,true)+'</div></div>';
+  });
+  return h;
+}
+
+function renderPapa(){
+  setColor('#1F3A5F');
+  setSky('papa');
+  if(!KID) KID=D.enfants[0].id;
+  var tabs=document.getElementById('tabs'); tabs.classList.remove('hide');
+  tabs.innerHTML=[['accueil','🏠','Accueil'],['operations','📋','Opérations'],['reglages','⚙️','Réglages']].map(function(t){ return '<button class="'+(VIEW===t[0]?'on':'')+'" onclick="VIEW=\''+t[0]+'\';render();window.scrollTo(0,0)"><span class="i">'+t[1]+'</span>'+t[2]+'</button>'; }).join('');
+  var h='';
+  if(VIEW==='accueil'){
+    h+='<h1>Argent de poche 💶</h1><div class="sub">'+cap(dlong(D.today))+'</div>';
+    D.enfants.forEach(function(en){
+      var s=solde(en), mo=duMois(en), ds=derniereSaisie(en), bc=dernierControleBanque(en), n=aControler(en);
+      var niv=niveauMeteo(s);
+      h+='<div class="card kid '+niv+'" style="--kc:'+en.couleur+'"><div class="minisky skyl '+niv+'">'+skyHTML(niv,true)+'</div><div class="top"><div><div style="font-weight:800;font-size:18px">'+en.emoji+' '+esc(en.prenom)+'</div><div class="muted">'+meteo(en)+'</div></div><div class="sol">'+eur(s)+'</div></div>';
+      h+='<div class="kpis" style="margin-top:12px"><div class="kpi"><div class="l">Dépensé ce mois</div><div class="v">'+eur(mo.dep)+'</div></div><div class="kpi"><div class="l">Virement mensuel</div><div class="v">'+(en.mensuel>0?eur0(en.mensuel):'—')+'</div></div></div>';
+      h+='<div class="alerts">';
+      if(!ds) h+='<div class="al status warn">✏️ Aucune saisie pour l\'instant.</div>';
+      else { var j=daysBetween(ds,D.today); h+='<div class="al status '+(j>7?'warn':'ok')+'">✏️ Dernière saisie '+(j===0?'aujourd\'hui':j===1?'hier':'il y a '+j+' jours')+(j>7?' : à relancer ?':'')+'</div>'; }
+      h+=statutBanque(bc,false).replace('class="status','class="al status');
+      if(n) h+='<div class="al status warn">🔍 '+n+' ligne'+(n>1?'s':'')+' à contrôler</div>';
+      h+='</div><div class="row" style="margin-top:12px"><button class="btn soft small" style="flex:1" onclick="KID=\''+en.id+'\';VIEW=\'operations\';render();window.scrollTo(0,0)">Voir le détail</button><button class="btn ghost small" style="flex:1" onclick="formBanque(\''+en.id+'\')">🏦 Solde banque</button></div></div>';
+    });
+    h+='<button class="btn main" onclick="formExceptionnel()">🎁 Virement exceptionnel</button>';
+    var sansMensuel=D.enfants.filter(function(e){return !(e.mensuel>0)}).length;
+    if(sansMensuel) h+='<div class="help">💡 Réglez le montant du virement mensuel dans l\'onglet <b>Réglages</b> : il s\'ajoutera ensuite tout seul chaque mois dans leur appli.</div>';
+  }
+  if(VIEW==='operations'){
+    var en=kid(KID);
+    h+='<h1>Opérations</h1><div class="seg">'+D.enfants.map(function(e){ return '<button class="'+(e.id===KID?'on':'')+'" onclick="KID=\''+e.id+'\';render()">'+e.emoji+' '+esc(e.prenom)+'</button>'; }).join('')+'</div>';
+    h+='<div class="card"><div class="top" style="display:flex;justify-content:space-between;align-items:center"><div><div class="muted">Solde de '+esc(en.prenom)+'</div><div style="font-size:28px;font-weight:800">'+eur(solde(en))+'</div></div>'+(aControler(en)?'<button class="btn soft small" onclick="toutCtrl(\''+en.id+'\')">✓ Tout contrôlé</button>':'<span class="tag ok">Tout est contrôlé</span>')+'</div>';
+    h+='<div class="help">Cochez une ligne quand vous l\'avez vérifiée. Une ligne cochée ne peut plus être modifiée par '+esc(en.prenom)+'. Touchez une ligne pour la modifier ou la supprimer.</div>';
+    h+='<div class="row" style="margin-top:12px"><button class="btn ghost small" style="flex:1" onclick="formDepense(\''+en.id+'\')">➖ Dépense</button><button class="btn ghost small" style="flex:1" onclick="formExceptionnel(\''+en.id+'\')">🎁 Virement</button></div></div>';
+    h+='<div class="list">'+historique(en,true)+'</div>';
+  }
+  if(VIEW==='reglages'){
+    h+='<h1>Réglages</h1>';
+    h+='<div class="card"><h2>💶 Virement mensuel</h2>';
+    D.enfants.forEach(function(en){ h+='<label class="f">'+en.emoji+' '+esc(en.prenom)+' (€ par mois)</label><input id="r_m_'+en.id+'" type="number" inputmode="decimal" step="0.01" min="0" value="'+en.mensuel+'">'; });
+    h+='<label class="f">Jour du virement (1 à 28)</label><input id="r_jour" type="number" inputmode="numeric" min="1" max="28" value="'+D.jourVirement+'">';
+    h+='<div class="help">Chaque mois, à ce jour-là, le virement apparaît tout seul dans leur appli. Si un mois vous ne le faites pas, ouvrez la ligne dans « Opérations » et supprimez-la.</div></div>';
+    h+='<div class="card"><h2>🏁 Point de départ</h2><label class="f">Date de départ du suivi</label><input id="r_depart" type="date" value="'+D.dateDepart+'">';
+    D.enfants.forEach(function(en){ h+='<label class="f">Solde du compte de '+esc(en.prenom)+' ce jour-là (€)</label><input id="r_s_'+en.id+'" type="number" inputmode="decimal" step="0.01" value="'+en.soldeDepart+'">'; });
+    h+='<div class="help">Mettez le solde affiché par leur banque le matin de la date de départ. Tout ce qui est noté avant cette date n\'est pas compté.</div></div>';
+    h+='<button class="btn main" onclick="saveReglages()">Enregistrer les réglages</button>';
+    h+='<div class="card"><h2>🔗 Les liens des applis</h2>';
+    if(D.liens){
+      D.enfants.forEach(function(en){ h+=lienBox(en.emoji+' '+en.prenom, D.liens[en.id], en.prenom); });
+      h+=lienBox('👨 Papa (ne pas partager)', D.liens.papa, null);
+      h+='<div class="help">Envoyez à chacun <b>son</b> lien. Sur le téléphone : ouvrir le lien, puis <b>Partager → Sur l\'écran d\'accueil</b> (iPhone) ou <b>⋮ → Ajouter à l\'écran d\'accueil</b> (Android).</div>';
+    } else h+='<div class="muted">Les liens apparaîtront une fois l\'application déployée.</div>';
+    h+='</div>';
+  }
+  document.getElementById('app').innerHTML=h;
+}
+function lienBox(lab,url,prenom){
+  var id='l'+Math.random().toString(36).slice(2,8);
+  var sms=prenom?'<a class="btn soft small" href="sms:?&body='+encodeURIComponent('Salut '+prenom+' ! Voici ton appli pour suivre ton argent de poche : '+url)+'">SMS</a>':'';
+  return '<label class="f">'+esc(lab)+'</label><div class="linkbox"><input id="'+id+'" readonly value="'+esc(url)+'"><button class="btn ghost small" onclick="copier(\''+id+'\')">Copier</button>'+sms+'</div>';
+}
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+// ---------- actions
+function ctrl(id,v){ act('basculerControle',id,v); }
+function toutCtrl(e){ act('toutControler',e).then(function(){toast('✓ Tout est marqué contrôlé');}); }
+function copier(id){ var i=document.getElementById(id); i.select(); i.setSelectionRange(0,99999); var ok=false; try{ ok=document.execCommand('copy'); }catch(e){} if(navigator.clipboard&&!ok){ navigator.clipboard.writeText(i.value).then(function(){toast('Lien copié')},function(){toast('Sélectionnez le lien et copiez-le')}); } else toast(ok?'Lien copié':'Sélectionnez le lien et copiez-le'); }
+function saveReglages(){
+  var r={jour_virement:val('r_jour'), date_depart:val('r_depart')};
+  D.enfants.forEach(function(en){ r['mensuel_'+en.id]=num('r_m_'+en.id); r['solde_depart_'+en.id]=num('r_s_'+en.id); });
+  act('enregistrerReglages',r).then(function(){ toast('✓ Réglages enregistrés'); });
+}
+function val(id){ var e=document.getElementById(id); return e?e.value:''; }
+function num(id){ return Number(String(val(id)).replace(',','.'))||0; }
+
+// ---------- feuilles (formulaires)
+function openSheet(h){ document.getElementById('sheet').innerHTML='<div class="grab"></div>'+h; document.getElementById('veil').classList.add('open'); }
+function closeSheet(){ document.getElementById('veil').classList.remove('open'); }
+document.getElementById('veil').addEventListener('click',function(e){ if(e.target.id==='veil') closeSheet(); });
+
+var F={};
+function chipRow(list,icons,sel,key){ return '<div class="chips">'+list.map(function(c){ return '<button type="button" class="chip'+(c===sel?' on':'')+'" onclick="F.'+key+'=\''+c.replace(/'/g,"\\'")+'\';document.querySelectorAll(\'.chip[data-k='+key+']\').forEach(function(x){x.classList.toggle(\'on\',x.dataset.v===F.'+key+')})" data-k="'+key+'" data-v="'+esc(c)+'">'+(icons[c]||'')+' '+esc(c)+'</button>'; }).join('')+'</div>'; }
+
+function formDepense(enfant){
+  F={categorie:'Nourriture'};
+  var pour=enfant&&D.role==='parent'?' pour '+esc(kid(enfant).prenom):'';
+  openSheet('<h2>➖ Nouvelle dépense'+pour+'</h2><input id="f_m" class="amount" type="text" inputmode="decimal" placeholder="0,00 €" autocomplete="off">'+
+    '<label class="f">C\'était pour quoi ?</label>'+chipRow(D.categories,CAT_ICO,F.categorie,'categorie')+
+    '<label class="f">Détail (facultatif)</label><input id="f_l" maxlength="80" placeholder="ex. ciné avec Léa">'+
+    '<label class="f">Date</label><input id="f_d" type="date" value="'+D.today+'" min="'+D.dateDepart+'" max="'+D.today+'">'+
+    '<div class="row" style="margin-top:18px"><button class="btn ghost" onclick="closeSheet()">Annuler</button><button class="btn main" onclick="saveMvt(\'depense\',\''+(enfant||'')+'\')">Enregistrer</button></div>');
+  setTimeout(function(){ var i=document.getElementById('f_m'); i&&i.focus(); },250);
+}
+function formRentree(){
+  F={};
+  openSheet('<h2>➕ J\'ai reçu de l\'argent</h2><div class="muted">Un petit job, un cadeau de mamie… (le virement de Papa s\'ajoute tout seul)</div><input id="f_m" class="amount" type="text" inputmode="decimal" placeholder="0,00 €" autocomplete="off">'+
+    '<label class="f">D\'où vient cet argent ?</label><input id="f_l" maxlength="80" placeholder="ex. baby-sitting">'+
+    '<label class="f">Date</label><input id="f_d" type="date" value="'+D.today+'" min="'+D.dateDepart+'" max="'+D.today+'">'+
+    '<div class="row" style="margin-top:18px"><button class="btn ghost" onclick="closeSheet()">Annuler</button><button class="btn main" onclick="saveMvt(\'rentree\',\'\')">Enregistrer</button></div>');
+}
+function formExceptionnel(enfant){
+  F={categorie:'Noël', enfant: enfant||'tous'};
+  var opts=[['tous','👫 Les deux']].concat(D.enfants.map(function(e){return [e.id,e.emoji+' '+e.prenom]}));
+  openSheet('<h2>🎁 Virement exceptionnel</h2><label class="f">Pour qui ?</label><div class="seg" style="margin:0">'+opts.map(function(o){ return '<button type="button" data-e="'+o[0]+'" class="'+(o[0]===F.enfant?'on':'')+'" onclick="F.enfant=\''+o[0]+'\';this.parentNode.querySelectorAll(\'button\').forEach(function(b){b.classList.toggle(\'on\',b.dataset.e===F.enfant)})">'+esc(o[1])+'</button>'; }).join('')+'</div>'+
+    '<label class="f">Montant (pour chacun)</label><input id="f_m" class="amount" type="text" inputmode="decimal" placeholder="0,00 €" autocomplete="off">'+
+    '<label class="f">Occasion</label>'+chipRow(D.motifs,MOT_ICO,F.categorie,'categorie')+
+    '<label class="f">Message (facultatif)</label><input id="f_l" maxlength="80" placeholder="ex. Joyeux Noël !">'+
+    '<label class="f">Date du virement</label><input id="f_d" type="date" value="'+D.today+'">'+
+    '<div class="row" style="margin-top:18px"><button class="btn ghost" onclick="closeSheet()">Annuler</button><button class="btn main" onclick="saveMvt(\'exceptionnel\',\'\')">Enregistrer</button></div>');
+}
+function formBanque(enfant){
+  var en=kid(enfant);
+  openSheet('<h2>🏦 Comparer avec la banque</h2><div class="muted">Ouvre ton appli bancaire et tape le solde affiché pour le compte de '+esc(en.prenom)+'.</div>'+
+    '<input id="f_m" class="amount" type="text" inputmode="decimal" placeholder="0,00 €" autocomplete="off">'+
+    '<label class="f">Date</label><input id="f_d" type="date" value="'+D.today+'" max="'+D.today+'">'+
+    '<div class="row" style="margin-top:18px"><button class="btn ghost" onclick="closeSheet()">Annuler</button><button class="btn main" onclick="saveBanque(\''+enfant+'\')">Comparer</button></div>');
+}
+function lireMontant(){ var v=String(val('f_m')).replace(/\s|€/g,'').replace(',','.'); var n=Number(v); if(!v||!isFinite(n)||n<=0){ toast('Tape un montant'); return null; } return n; }
+function saveMvt(type,enfant){
+  var n=lireMontant(); if(n===null) return;
+  var m={type:type, montant:n, libelle:val('f_l'), date:val('f_d')||D.today, categorie:F.categorie||''};
+  if(D.role==='parent') m.enfant = type==='exceptionnel' ? F.enfant : (enfant||KID);
+  act('ajouterMouvement',m).then(function(){ closeSheet(); toast(type==='depense'?'✓ Dépense notée':type==='exceptionnel'?'🎁 Virement ajouté':'✓ C\'est noté'); });
+}
+function saveBanque(enfant){
+  var v=String(val('f_m')).replace(/\s|€/g,'').replace(',','.'); var n=Number(v); if(v===''||!isFinite(n)){ toast('Tape le solde'); return; }
+  act('declarerSoldeBanque',enfant,n,val('f_d')||D.today).then(function(){
+    var en=kid(enfant), bc=dernierControleBanque(en);
+    if(Math.abs(bc.ecart)<1){ closeSheet(); toast('✅ Tout est juste !'); return; }
+    openSheet('<h2>Résultat</h2>'+statutBanque(bc,D.role==='enfant')+
+      '<div class="help">Le mieux : retrouve dans ton appli bancaire les opérations oubliées et note-les. Si tu ne trouves pas, tu peux ajouter une correction de '+eur(bc.ecart,true)+' (Papa la verra).</div>'+
+      '<div class="row" style="margin-top:16px"><button class="btn ghost" onclick="closeSheet()">Je cherche</button><button class="btn soft" onclick="corriger(\''+enfant+'\','+bc.ecart+')">Corriger</button></div>');
+  });
+}
+function corriger(enfant,ecart){
+  var m={type:'correction', montant:ecart, libelle:'Correction après comparaison avec la banque', date:D.today};
+  if(D.role==='parent') m.enfant=enfant;
+  act('ajouterMouvement',m).then(function(){ closeSheet(); toast('🔧 Correction ajoutée'); });
+}
+function detail(enfant,id){
+  var en=kid(enfant), m=en.mouvements.filter(function(x){return x.id===id})[0]; if(!m) return;
+  var papa=D.role==='parent', mien=m.saisiPar===D.me;
+  var peut=papa || (mien && !m.controle);
+  var h='<div style="text-align:center"><div style="font-size:40px">'+icon(m)+'</div><div style="font-size:30px;font-weight:800" class="'+(m.montant>0?'pos':'')+'">'+eur(m.montant,true)+'</div><div style="font-weight:700">'+esc(titre(m))+'</div><div class="muted">'+cap(dlong(m.date))+' '+m.date.slice(0,4)+' · '+(m.saisiPar==='auto'?'ajouté automatiquement':m.saisiPar==='papa'?'noté par Papa':'noté par '+esc(en.prenom))+'</div>'+(m.controle?'<div style="margin-top:6px"><span class="tag ok">✓ vu par Papa</span></div>':'')+'</div>';
+  if(peut){
+    h+='<label class="f">Montant</label><input id="e_m" type="text" inputmode="decimal" value="'+String(Math.abs(m.montant)).replace('.',',')+'">';
+    if(m.type!=='mensuel'&&m.type!=='correction') h+='<label class="f">Détail</label><input id="e_l" maxlength="80" value="'+esc(m.libelle)+'">';
+    if(m.type!=='mensuel') h+='<label class="f">Date</label><input id="e_d" type="date" value="'+m.date+'">';
+    h+='<div class="row" style="margin-top:16px"><button class="btn danger" onclick="suppr(\''+id+'\')">Supprimer</button><button class="btn main" onclick="modif(\''+id+'\',\''+m.type+'\')">Enregistrer</button></div>';
+  } else if(mien && m.controle) h+='<div class="help" style="text-align:center">Papa a déjà vérifié cette ligne. Pour la changer, demande-lui.</div>';
+  h+='<button class="btn ghost" style="margin-top:10px" onclick="closeSheet()">Fermer</button>';
+  openSheet(h);
+}
+function modif(id,type){
+  var raw=String(val('e_m')).replace(/\s|€/g,'').replace(',','.'), n=Number(raw);
+  if(!raw||!isFinite(n)){ toast('Montant invalide'); return; }
+  if(type==='correction'){ var old=null; D.enfants.forEach(function(e){ e.mouvements.forEach(function(x){ if(x.id===id) old=x; }); }); if(old&&old.montant<0) n=-Math.abs(n); }
+  var p={montant:n}; if(document.getElementById('e_l')) p.libelle=val('e_l'); if(document.getElementById('e_d')) p.date=val('e_d');
+  act('modifierMouvement',id,p).then(function(){ closeSheet(); toast('✓ Modifié'); });
+}
+function suppr(id){ if(!confirmDel()) return; act('supprimerMouvement',id).then(function(){ closeSheet(); toast('🗑️ Supprimé'); }); }
+function confirmDel(){ var b=document.querySelector('.sheet .btn.danger'); if(b && !b.dataset.sure){ b.dataset.sure='1'; b.textContent='Sûr ? Touchez encore'; return false; } return true; }
+
+// ---------- démarrage
+function erreur(t){
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').innerHTML='<div class="card" style="margin-top:40px;text-align:center"><div style="font-size:44px">🔒</div><h2>'+esc(t)+'</h2><div class="muted">Ouvre l\'appli avec le lien que Papa t\'a envoyé.</div></div>';
+}
+(function(){
+  if(!BOOT.u||!BOOT.k){ erreur('Lien incomplet'); return; }
+  var t=setTimeout(function(){ document.querySelector('#loading div:last-child').textContent='Connexion lente… encore un instant'; },6000);
+  call('getData').then(function(d){ clearTimeout(t); D=d; render(); }).catch(function(e){ clearTimeout(t); erreur(msg(e)); });
+})();
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+</script>
+</body>
+</html>
